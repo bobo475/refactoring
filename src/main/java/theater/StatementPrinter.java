@@ -31,24 +31,39 @@ public class StatementPrinter {
      */
     @SuppressWarnings({"checkstyle:LineLength", "checkstyle:NeedBraces", "checkstyle:SuppressWarnings"})
     public String statement() {
-        int totalAmount = 0;
-        int volumeCredits = 0;
+        final int volumeCredits = getTotalVolumeCredits();
+        final int totalAmount = getTotalAmount();
+
         final StringBuilder result = new StringBuilder("Statement for " + invoice.getCustomer() + System.lineSeparator());
-
         for (Performance p : invoice.getPerformances()) {
-
-            // add volume credits
-            volumeCredits += Math.max(p.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
-            // add extra credit for every five comedy attendees
-            if ("comedy".equals(getPlay(p).getType())) volumeCredits += p.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
-
-            // print line for this order
             result.append(String.format("  %s: %s (%s seats)%n", getPlay(p).getName(), usd(getAmount(p)), p.getAudience()));
-            totalAmount += getAmount(p);
         }
+
+        result.append(String.format("Amount owed is %s%n", usd(totalAmount)));
+        result.append(String.format("You earned %s credits%n", volumeCredits));
+
         result.append(String.format("Amount owed is %s%n", usd(totalAmount)));
         result.append(String.format("You earned %s credits%n", volumeCredits));
         return result.toString();
+    }
+
+    private int getTotalAmount() {
+        int totalAmount = 0;
+        for (Performance p : invoice.getPerformances()) {
+            totalAmount += getAmount(p);
+        }
+        return totalAmount;
+    }
+
+    private int getTotalVolumeCredits() {
+        int volumeCredits = 0;
+        for (Performance p : invoice.getPerformances()) {
+            volumeCredits += Math.max(p.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
+            if ("comedy".equals(getPlay(p).getType())) {
+                volumeCredits += p.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
+            }
+        }
+        return volumeCredits;
     }
 
     private static String usd(int totalAmount) {
