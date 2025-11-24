@@ -1,3 +1,5 @@
+2da09ab Task 2.2
+29203ce Update log.txt
 d30d18b Task 2.1
 bf0617d Task 1.2
 13066ce fix check style
